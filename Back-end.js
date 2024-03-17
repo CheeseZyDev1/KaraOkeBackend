@@ -4,8 +4,10 @@ const { DataTypes } = require('sequelize');
 const app = express();
 app.use(express.json());
 
-const dbUrl ='postgres://webadmin:RQVlxp52171@node56364-noderest-1.proen.app.ruk-com.cloud/Users'
-const sequelize = new Sequelize(dbUrl);
+const sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: './Database/Karaoke.sqlite'
+});
 
 // Define models for Users, Rooms, Bookings, and PaymentDetails
 const Users = sequelize.define('Users', {
