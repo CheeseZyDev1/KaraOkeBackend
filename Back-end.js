@@ -173,7 +173,6 @@ app.delete('/users/:id', async (req, res) => {
         res.status(400).json({ error: error.message });
     });
 });
-/*
 //CRUD ROOM
 app.get('/bookings/create', async (req, res) => {
     // Fetch rooms from the database
@@ -388,7 +387,6 @@ app.delete('/paymentdetails/:id', async (req, res) => {
     }
 });
 //CRUD
-*/
 // Sync models with the database
 sequelize.sync()
     .then(() => {
