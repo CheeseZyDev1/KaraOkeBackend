@@ -391,7 +391,9 @@ app.delete('/paymentdetails/:id', async (req, res) => {
 // Sync models with the database
 sequelize.sync()
     .then(() => {
-        const port = process.env.PORT || 3000;
-        app.listen(port, () => console.log(`Listening on port ${port}...`));
+       const port = process.env.PORT || 3000;
+            app.listen(port, ()=>{
+    console.log("Listening on port  " + port);
+});
     })
     .catch(err => console.error('Error syncing with the database:', err));
