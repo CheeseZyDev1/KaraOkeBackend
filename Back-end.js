@@ -1,398 +1,412 @@
-const express = require('express');
-const Sequelize = require('sequelize');
-const { DataTypes } = require('sequelize');
+const express = require("express");
+const Sequelize = require("sequelize");
+const { DataTypes } = require("sequelize");
 const app = express();
 app.use(express.json());
 
 const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: './Database/Karaoke.sqlite'
+  dialect: "sqlite",
+  storage: "./Database/Karaoke.sqlite",
 });
 
 // Define models for Users, Rooms, Bookings, and PaymentDetails
-const Users = sequelize.define('Users', {
-    UserID: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    Username: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    Password: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    Email: {
-        type: DataTypes.STRING
-    },
-    Phone: {
-        type: DataTypes.STRING
-    }
+const Users = sequelize.define("Users", {
+  UserID: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  Username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  Password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  Email: {
+    type: DataTypes.STRING,
+  },
+  Phone: {
+    type: DataTypes.STRING,
+  },
 });
 
-const Rooms = sequelize.define('Rooms', {
-    RoomID: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    RoomName: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    Capacity: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    Status: {
-        type: DataTypes.ENUM('Available', 'Booked'),
-        defaultValue: 'Available'
-    }
+const Rooms = sequelize.define("Rooms", {
+  RoomID: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  RoomName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  Capacity: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  Status: {
+    type: DataTypes.ENUM("Available", "Booked"),
+    defaultValue: "Available",
+  },
 });
 
-const Bookings = sequelize.define('Bookings', {
-    BookingID: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    StartTime: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    EndTime: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    Status: {
-        type: DataTypes.ENUM('Pending', 'Confirmed', 'Cancelled'),
-        defaultValue: 'Pending'
-    }
+const Bookings = sequelize.define("Bookings", {
+  BookingID: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  StartTime: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  EndTime: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  Status: {
+    type: DataTypes.ENUM("Pending", "Confirmed", "Cancelled"),
+    defaultValue: "Pending",
+  },
 });
 
-const PaymentDetails = sequelize.define('PaymentDetails', {
-    PaymentID: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    Amount: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false
-    },
-    PaymentMethod: {
-        type: DataTypes.ENUM('Credit Card', 'Debit Card', 'Cash'),
-        allowNull: false
-    },
-    PaymentStatus: {
-        type: DataTypes.ENUM('Pending', 'Completed', 'Refunded'),
-        defaultValue: 'Pending'
-    },
-    PaymentDate: {
-        type: DataTypes.DATE,
-        allowNull: false
-    }
+const PaymentDetails = sequelize.define("PaymentDetails", {
+  PaymentID: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  Amount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+  },
+  PaymentMethod: {
+    type: DataTypes.ENUM("Credit Card", "Debit Card", "Cash"),
+    allowNull: false,
+  },
+  PaymentStatus: {
+    type: DataTypes.ENUM("Pending", "Completed", "Refunded"),
+    defaultValue: "Pending",
+  },
+  PaymentDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
 });
 // Define associations between models
-Users.hasMany(Bookings, { foreignKey: 'UserID' });
-Rooms.hasMany(Bookings, { foreignKey: 'RoomID' });
-Bookings.belongsTo(Users, { foreignKey: 'UserID' });
-Bookings.belongsTo(Rooms, { foreignKey: 'RoomID' });
-Bookings.hasOne(PaymentDetails, { foreignKey: 'BookingID' });
+Users.hasMany(Bookings, { foreignKey: "UserID" });
+Rooms.hasMany(Bookings, { foreignKey: "RoomID" });
+Bookings.belongsTo(Users, { foreignKey: "UserID" });
+Bookings.belongsTo(Rooms, { foreignKey: "RoomID" });
+Bookings.hasOne(PaymentDetails, { foreignKey: "BookingID" });
 
 //CRUD
 // CRUD Operations for Users
 // Add a GET route to retrieve all users
 
 // Route สำหรับการสร้างผู้ใช้ใหม่
-app.post('/users/create', async (req, res) => {
-    try{
-        await Users.create(req.body);
-        res.status(200).json({});
-    }catch(error){
-        res.status(400).json({ error: error.message });
-    }
+app.post("/users/create", async (req, res) => {
+  try {
+    await Users.create(req.body);
+    res.status(200).json({});
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.get('/users', async (req, res) => {
-    try {
-        const users = await Users.findAll();
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+app.get("/users", async (req, res) => {
+  try {
+    const users = await Users.findAll();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
-
 
 // Add a GET route to retrieve a single user by UserID
-app.get('/users/:id', async (req, res) => {
-    try {
-        const user = await Users.findByPk(req.params.id);
-        if (user) {
-            res.status(200).json(user);
-        } else {
-            res.status(404).json({ error: 'User not found' });
-        }
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+app.get("/users/:id", async (req, res) => {
+  try {
+    const user = await Users.findByPk(req.params.id);
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).json({ error: "User not found" });
     }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-
-app.put('/user/:id' , (req,res) => {
-    Users.findByPk(req.params.id).then(user => {
-        if(!user){
-            res.status(500).send('Book not found');
-        }
-        else{
-            user.update(req.body).then(() => {
-                res.send(user);
-            }).catch(err => {
-                res.status(500).send(err);
-            });
-        }
-    }).catch(err => {
-        res.status(500).send(err);
+app.put("/user/:id", (req, res) => {
+  Users.findByPk(req.params.id)
+    .then((user) => {
+      if (!user) {
+        res.status(500).send("Book not found");
+      } else {
+        user
+          .update(req.body)
+          .then(() => {
+            res.send(user);
+          })
+          .catch((err) => {
+            res.status(500).send(err);
+          });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send(err);
     });
 });
 
-app.delete('/users/:id', async (req, res) => {
-    Users.findByPk(req.params.id).then(user => {
-        if(!user){
-            res.status(404).send('Book not found');
-        } else {
-            user.destroy().then(() =>{
+app.delete("/users/:id", async (req, res) => {
+  Users.findByPk(req.params.id)
+    .then((user) => {
+      if (!user) {
+        res.status(404).send("Book not found");
+      } else {
+        user
+          .destroy()
+          .then(() => {
             res.send({});
-            }).catch(err => {
-                res.status(500).send(err);
-            });
-        }
-    }).catch (error =>{
-        res.status(400).json({ error: error.message });
+          })
+          .catch((err) => {
+            res.status(500).send(err);
+          });
+      }
+    })
+    .catch((error) => {
+      res.status(400).json({ error: error.message });
     });
 });
 //CRUD ROOM
-app.get('/bookings/create', async (req, res) => {
-    // Fetch rooms from the database
+app.get("/bookings/create", async (req, res) => {
+  // Fetch rooms from the database
+  const rooms = await Rooms.findAll();
+
+  // Render the EJS template with rooms data
+  res.render("create_booking", { rooms }); // Assuming 'create_booking.ejs' is the name of your EJS file
+});
+
+app.get("/rooms", async (req, res) => {
+  try {
     const rooms = await Rooms.findAll();
-    
-    // Render the EJS template with rooms data
-    res.render('create_booking', { rooms }); // Assuming 'create_booking.ejs' is the name of your EJS file
+    res.status(200).json(rooms);
+  } catch (error) {
+    res.status(404).send(err);
+  }
 });
 
-app.get('/rooms', async(req,res) => {
-    try{
-        const rooms = await Rooms.findAll();
-        res.status(200).json(rooms)
-    }catch(error){
-        res.status(404).send(err)
-    }
+app.get("/rooms/:id", async (req, res) => {
+  try {
+    const rooms = await Rooms.findByPk(req.params.id);
+    res.status(200).json(rooms);
+  } catch (error) {
+    res.status(404).send(err);
+  }
 });
 
-app.get('/rooms/:id', async(req,res) => {
-    try{
-        const rooms = await Rooms.findByPk(req.params.id);
-        res.status(200).json(rooms)
-    }catch(error){
-        res.status(404).send(err)
-    }
+app.post("/rooms/create", async (req, res) => {
+  try {
+    const room = await Rooms.create(req.body);
+    res.status(200).json(room);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.post('/rooms/create', async (req, res) => {
-    try {
-        const room = await Rooms.create(req.body);
-        res.status(200).json(room);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+app.put("/rooms/:id", async (req, res) => {
+  try {
+    const [updated] = await Rooms.update(req.body, {
+      where: { RoomID: req.params.id },
+    });
+    if (updated) {
+      const updatedRoom = await Rooms.findOne({
+        where: { RoomID: req.params.id },
+      });
+      res.status(200).json(updatedRoom);
+    } else {
+      res.status(404).json({ error: "Room not found" });
     }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.put('/rooms/:id', async (req, res) => {
-    try {
-        const [updated] = await Rooms.update(req.body, { where: { RoomID: req.params.id } });
-        if (updated) {
-            const updatedRoom = await Rooms.findOne({ where: { RoomID: req.params.id } });
-            res.status(200).json(updatedRoom);
-        } else {
-            res.status(404).json({ error: 'Room not found' });
-        }
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+app.delete("/rooms/:id", async (req, res) => {
+  try {
+    const deleted = await Rooms.destroy({ where: { RoomID: req.params.id } });
+    if (deleted) {
+      res.status(204).send();
+    } else {
+      res.status(404).json({ error: "Room not found" });
     }
-});
-
-app.delete('/rooms/:id', async (req, res) => {
-    try {
-        const deleted = await Rooms.destroy({ where: { RoomID: req.params.id } });
-        if (deleted) {
-            res.status(204).send();
-        } else {
-            res.status(404).json({ error: 'Room not found' });
-        }
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 //CRUD BOOKING
-app.get('/bookings', async (req, res) => {
-    try {
-        const bookings = await Bookings.findAll();
-        res.status(200).json(bookings);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+app.get("/bookings", async (req, res) => {
+  try {
+    const bookings = await Bookings.findAll();
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.get('/bookings/:id', async (req, res) => {
-    try {
-        const bookings = await Bookings.findByPk(req.params.id);
-        res.status(200).json(bookings);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+app.get("/bookings/:id", async (req, res) => {
+  try {
+    const bookings = await Bookings.findByPk(req.params.id);
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.post('/booking/create', async (req, res) => {
-    try {
-        const booking = await Bookings.create(req.body);
-        res.status(200).json(booking);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+app.post("/booking/create", async (req, res) => {
+  try {
+    const booking = await Bookings.create(req.body);
+    res.status(200).json(booking);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
-app.post('/bookings/edit/:id', async (req, res) => {
-    const bookingId = req.params.id;
-    const { userId, roomId, startTime, endTime } = req.body;
+app.post("/bookings/edit/:id", async (req, res) => {
+  const bookingId = req.params.id;
+  const { userId, roomId, startTime, endTime } = req.body;
 
-    try {
-        const booking = await Booking.findByPk(bookingId);
+  try {
+    const booking = await Booking.findByPk(bookingId);
 
-        if (!booking) {
-            return res.status(404).send('Booking not found');
-        }
-
-        await booking.update({
-            UserId: userId,
-            RoomId: roomId,
-            StartTime: startTime,
-            EndTime: endTime
-        });
-
-        // Redirect to a confirmation page, booking list, or show a success message
-        res.redirect('/bookings'); // or any other page
-    } catch (error) {
-        console.error('Failed to update booking:', error);
-        res.status(500).send('Server error');
+    if (!booking) {
+      return res.status(404).send("Booking not found");
     }
-});
 
-app.put('/booking/edit/:id', async (req, res) => {
-    try {
-        const booking = await Bookings.findByPk(req.params.id)
-        if(booking){
-            booking.update(req.body)
-            res.status(202).json(booking)
-        }else{
-            res.status(404)
-        }
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+    await booking.update({
+      UserId: userId,
+      RoomId: roomId,
+      StartTime: startTime,
+      EndTime: endTime,
+    });
+
+    // Redirect to a confirmation page, booking list, or show a success message
+    res.redirect("/bookings"); // or any other page
+  } catch (error) {
+    console.error("Failed to update booking:", error);
+    res.status(500).send("Server error");
+  }
 });
 
-app.delete('/bookings/:id', async (req, res) => {
-    try {
-        const deleted = await Bookings.destroy({ where: { BookingID: req.params.id } });
-        if (deleted) {
-            res.status(204).send();
-        } else {
-            res.status(404).json({ error: 'Booking not found' });
-        }
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+app.put("/booking/edit/:id", async (req, res) => {
+  try {
+    const booking = await Bookings.findByPk(req.params.id);
+    if (booking) {
+      booking.update(req.body);
+      res.status(202).json(booking);
+    } else {
+      res.status(404);
     }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete("/bookings/:id", async (req, res) => {
+  try {
+    const deleted = await Bookings.destroy({
+      where: { BookingID: req.params.id },
+    });
+    if (deleted) {
+      res.status(204).send();
+    } else {
+      res.status(404).json({ error: "Booking not found" });
+    }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 //CRUD PAYMENT
-app.post('/paymentdetails/create', async (req, res) => {
-    try {
-        const { amount, paymentMethod, paymentStatus, paymentDate } = req.body;
+app.post("/paymentdetails/create", async (req, res) => {
+  try {
+    const { amount, paymentMethod, paymentStatus, paymentDate } = req.body;
 
-        const newPayment = await PaymentDetails.create({
-            Amount: amount,
-            PaymentMethod: paymentMethod,
-            PaymentStatus: paymentStatus,
-            PaymentDate: paymentDate
-        });
-
-    } catch (error) {
-        console.error('Failed to create payment:', error);
-        res.status(500).send('Server error');
-    }
+    const newPayment = await PaymentDetails.create({
+      Amount: amount,
+      PaymentMethod: paymentMethod,
+      PaymentStatus: paymentStatus,
+      PaymentDate: paymentDate,
+    });
+  } catch (error) {
+    console.error("Failed to create payment:", error);
+    res.status(500).send("Server error");
+  }
 });
 
-app.get('/paymentdetails', async (req, res) => {
-    try {
-        const paymentDetail = await PaymentDetails.findAll();
-        res.status(200).json(paymentDetail);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+app.get("/paymentdetails", async (req, res) => {
+  try {
+    const paymentDetail = await PaymentDetails.findAll();
+    res.status(200).json(paymentDetail);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.get('/paymentdetail/:id', async (req, res) => {
-    try {
-        const paymentDetail = await PaymentDetails.findByPk(req.params.id);
-        res.status(200).json(paymentDetail);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+app.get("/paymentdetail/:id", async (req, res) => {
+  try {
+    const paymentDetail = await PaymentDetails.findByPk(req.params.id);
+    res.status(200).json(paymentDetail);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.get('/paymentdetails/create', async (req, res) => {
-    try {
-        const paymentDetail = await PaymentDetails.create(req.body);
-        res.status(200).json(paymentDetail);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
+app.get("/paymentdetails/create", async (req, res) => {
+  try {
+    const paymentDetail = await PaymentDetails.create(req.body);
+    res.status(200).json(paymentDetail);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-
-app.put('/paymentdetail/:id', async (req, res) => {
-    try {
-         const payment = await PaymentDetails.findByPk(req.params.id);
-         if(payment){
-            payment.update(req.body); 
-            res.status(202).json(payment)
-        }else{
-            res.status(404).send('Not found payment')
-        }
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+app.put("/paymentdetail/:id", async (req, res) => {
+  try {
+    const payment = await PaymentDetails.findByPk(req.params.id);
+    if (payment) {
+      payment.update(req.body);
+      res.status(202).json(payment);
+    } else {
+      res.status(404).send("Not found payment");
     }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.delete('/paymentdetails/:id', async (req, res) => {
-    try {
-        const deleted = await PaymentDetails.destroy({ where: { PaymentID: req.params.id } });
-        if (deleted) {
-            res.status(204).send();
-        } else {
-            res.status(404).json({ error: 'Payment detail not found' });
-        }
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+app.delete("/paymentdetails/:id", async (req, res) => {
+  try {
+    const deleted = await PaymentDetails.destroy({
+      where: { PaymentID: req.params.id },
+    });
+    if (deleted) {
+      res.status(204).send();
+    } else {
+      res.status(404).json({ error: "Payment detail not found" });
     }
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 //CRUD
 // Sync models with the database
-sequelize.sync()
-    .then(() => {
-       const port = process.env.PORT || 3000;
-            app.listen(port, ()=>{
-    console.log("Listening on port  " + port);
-});
-    })
-    .catch(err => console.error('Error syncing with the database:', err));
+sequelize
+  .sync()
+  .then(() => {
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => {
+      console.log("Listening on port  " + port);
+    });
+  })
+  .catch((err) => console.error("Error syncing with the database:", err));
